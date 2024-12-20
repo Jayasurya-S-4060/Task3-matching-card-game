@@ -63,22 +63,6 @@
   align-items: center;
 }
 
-@keyframes scatterCards {
-  0% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(
-        calc(50vw * (random() - 0.5)),
-        calc(50vh * (random() - 0.5))
-      )
-      rotate(360deg);
-  }
-  100% {
-    transform: translate(0, 0);
-  }
-}
-
 .card.animate {
   animation: scatterCards 1.5s ease-in-out;
 }
