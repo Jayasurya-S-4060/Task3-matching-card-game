@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Flip</title>
+    <link rel="stylesheet" href="./index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rock+Salt&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="main">
+      <header
+        class="w-screen h-20 px-4 md:px-40 text-3xl flex items-center justify-between"
+      >
+        <div class="w-20">
+          <img src="./assests/logo.png" width="100%" />
+        </div>
+        <div class="flex font items-center gap-10">
+          <div class="text-lg md:text-xl text-red-500 font">
+            Lives - <span id="lives-counter">5</span>
+          </div>
+          <div>
+            <button
+              id="restart-btn"
+              class="text-red-500 font text-lg md:text-xl"
+            >
+              Restart
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div
+        class="body card-container grid grid-cols-3 md:grid-cols-4 gap-auto justify-items-center p-4"
+      ></div>
+    </div>
+    <script>
+      let items = [1, 2, 3, 4, 5, 6];
+      items = [...items, ...items];
+      let firstCard = null;
+      let secondCard = null;
+      let isProcessing = false;
+      let lives = 5;
+
+      function shuffleCards() {
+        items = items.sort(() => Math.random() - 0.5);
+        document.querySelector(".card-container").innerHTML = "";
+        lives = 5;
+        document.getElementById("lives-counter").textContent = lives;
+        createCards();
+      }
+      function animateRestart() {
+        const cards = document.querySelectorAll(".card");
+
+        cards.forEach((card) => {
+          const randomX = Math.floor(Math.random() * 300) - 150;
+          const randomY = Math.floor(Math.random() * 300) - 150;
+          const randomRotation = Math.floor(Math.random() * 360);
+
+          card.style.transition = "transform 1.5s ease-in-out";
+          card.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
+        });
+
+        setTimeout(() => {
+          cards.forEach((card) => {
+            card.style.transition = "transform 0.5s ease-in-out";
+            card.style.transform = "translate(0, 0) rotate(0deg)";
+          });
+
+          shuffleCards();
+        }, 1500);
+      }
+
+      function createCards() {
+        items.forEach((item) => {
+          let card = document.createElement("div");
+          card.setAttribute("class", "card w-20 h-20 md:w-40 md:h-40");
+
+          let cardInner = document.createElement("div");
+          cardInner.setAttribute("class", "card-inner");
+
+          let cardFront = document.createElement("div");
+          let frontimg = document.createElement("img");
+          frontimg.setAttribute("src", `./assests/question.svg`);
+          frontimg.style.width = "100%";
+          cardFront.append(frontimg);
+
+          cardFront.setAttribute("class", "card-front");
+
+          let cardBack = document.createElement("div");
+          let content = document.createElement("span");
+          content.innerHTML = item;
+          let img = document.createElement("img");
+          img.setAttribute("src", `./assests/image${item}.png`);
+          img.style.width = "100%";
+
+          cardBack.setAttribute("class", "card-back");
+
+          cardBack.append(content);
+          cardBack.append(img);
+          cardInner.appendChild(cardFront);
+          cardInner.appendChild(cardBack);
+          card.appendChild(cardInner);
+
+          document.querySelector(".card-container").append(card);
+
+          card.addEventListener("click", function () {
+            if (
+              isProcessing ||
+              this.classList.contains("matched") ||
+              this.classList.contains("flipped")
+            ) {
+              return;
+            }
+
+            this.classList.add("flipped");
+
+            if (!firstCard) {
+              firstCard = this;
+            } else if (!secondCard) {
+              secondCard = this;
+              checkMatch();
+            }
+          });
+        });
+      }
+
+      function checkMatch() {
+        isProcessing = true;
+        const firstValue = firstCard.querySelector("span").innerHTML;
+        const secondValue = secondCard.querySelector("span").innerHTML;
+
+        if (firstValue === secondValue) {
+          firstCard.classList.add("matched");
+          secondCard.classList.add("matched");
+          resetSelection();
+
+          const allMatched =
+            document.querySelectorAll(".card.matched").length === items.length;
+          if (allMatched) {
+            setTimeout(() => {
+              alert("Congratulations! You've won the game!");
+              animateRestart();
+            }, 500);
+          }
+        } else {
+          lives--;
+          document.getElementById("lives-counter").textContent = lives;
+
+          setTimeout(() => {
+            firstCard.classList.remove("flipped");
+            secondCard.classList.remove("flipped");
+            resetSelection();
+
+            if (lives === 0) {
+              alert("Game Over! Restarting the game...");
+              animateRestart();
+            }
+          }, 1000);
+        }
+      }
+
+      function resetSelection() {
+        firstCard = null;
+        secondCard = null;
+        isProcessing = false;
+      }
+
+      document
+        .getElementById("restart-btn")
+        .addEventListener("click", animateRestart);
+
+      shuffleCards();
+    </script>
+  </body>
+</html>
